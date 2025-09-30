@@ -671,13 +671,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac1916040e43cc48b5ee5a64e34a082, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 3539793846657164221, guid: ff7695de8c12c1a47bb3c3dbfb7c8140, type: 3}
+  basicEnemyPrefab: {fileID: 3539793846657164221, guid: ff7695de8c12c1a47bb3c3dbfb7c8140, type: 3}
+  shooterEnemyPrefab: {fileID: 8070235206460444831, guid: 6e1ef638f402dd5498f03f3d50af4aad, type: 3}
+  fastEnemyPrefab: {fileID: 3505622959949368570, guid: 8aaac4e82e2d74047bf7310a03f842bc, type: 3}
+  dasherEnemyPrefab: {fileID: 1196402147827653659, guid: 0321ad31f475a5b49b27fc4535a2d676, type: 3}
+  teleporterEnemyPrefab: {fileID: 8943726348872153278, guid: d33b42866c28e7f40b3950354d49530d, type: 3}
+  tankEnemyPrefab: {fileID: 5275876573220995103, guid: e910ad037843d5d4db32597df9ca414f, type: 3}
   arenaCenter: {fileID: 0}
   spawnRadius: 15
-  initialEnemyCount: 3
   timeBetweenWaves: 3
-  enemyIncreasePerWave: 1
-  speedIncreasePerWave: 0.1
+  shooterUnlockWave: 3
+  fastUnlockWave: 4
+  dasherUnlockWave: 5
+  teleporterUnlockWave: 6
+  tankUnlockWave: 7
 --- !u!4 &1045153425
 Transform:
   m_ObjectHideFlags: 0

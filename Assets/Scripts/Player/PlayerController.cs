@@ -114,6 +114,13 @@ public class PlayerController : MonoBehaviour
                 {
                     enemiesHit++;
                     StartCoroutine(FlashEnemy(col.GetComponent<SpriteRenderer>()));
+
+                    // Если это танк - наносим урон
+                    TankEnemy tank = col.GetComponent<TankEnemy>();
+                    if (tank != null)
+                    {
+                        tank.TakeHit(impulseForce);
+                    }
                 }
 
                 Debug.Log($"🎯 Отброшен: {col.gameObject.name}");

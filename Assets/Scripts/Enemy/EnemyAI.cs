@@ -233,6 +233,16 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Альтернативный метод для физических коллайдеров
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Debug.Log("⚠️ Враг столкнулся с игроком!");
+            // TODO: Система урона
+        }
+    }
+
     // Визуализация состояния в редакторе
     void OnDrawGizmos()
     {

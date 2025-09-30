@@ -1,21 +1,31 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
-/// Управление игрой - спавн волн, счёт, состояние (2D версия)
+/// Управление игрой - спавн волн с разными типами врагов, счёт, состояние
 /// </summary>
 public class GameManager : MonoBehaviour
 {
+    [Header("Enemy Prefabs")]
+    [SerializeField] private GameObject basicEnemyPrefab;
+    [SerializeField] private GameObject shooterEnemyPrefab;
+    [SerializeField] private GameObject fastEnemyPrefab;
+    [SerializeField] private GameObject dasherEnemyPrefab;
+    [SerializeField] private GameObject teleporterEnemyPrefab;
+    [SerializeField] private GameObject tankEnemyPrefab;
+
     [Header("Wave Settings")]
-    [SerializeField] private GameObject enemyPrefab;
     [SerializeField] private Transform arenaCenter;
     [SerializeField] private float spawnRadius = 15f;
-    [SerializeField] private int initialEnemyCount = 3;
     [SerializeField] private float timeBetweenWaves = 3f;
 
-    [Header("Difficulty")]
-    [SerializeField] private float enemyIncreasePerWave = 1f; // Сколько врагов добавлять каждую волну
-    [SerializeField] private float speedIncreasePerWave = 0.1f; // Ускорение врагов
+    [Header("Wave Progression")]
+    [SerializeField] private int shooterUnlockWave = 3; // С какой волны появляются Shooter
+    [SerializeField] private int fastUnlockWave = 4; // Fast Enemy
+    [SerializeField] private int dasherUnlockWave = 5; // Dasher
+    [SerializeField] private int teleporterUnlockWave = 6; // Teleporter
+    [SerializeField] private int tankUnlockWave = 7; // Tank
 
     private int currentWave = 0;
     private int enemiesAlive = 0;
@@ -72,24 +82,122 @@ public class GameManager : MonoBehaviour
     {
         currentWave++;
         
-        // Рассчитываем количество врагов
-        int enemyCount = Mathf.RoundToInt(initialEnemyCount + (currentWave - 1) * enemyIncreasePerWave);
-        
-        Debug.Log($"🌊 ВОЛНА {currentWave}! Врагов: {enemyCount}");
+        Debug.Log($"🌊 ВОЛНА {currentWave}!");
 
-        for (int i = 0; i < enemyCount; i++)
+        // Определяем состав волны
+        List<GameObject> waveComposition = GetWaveComposition(currentWave);
+
+        // Спавним врагов
+        foreach (GameObject enemyPrefab in waveComposition)
         {
-            SpawnEnemy();
+            if (enemyPrefab != null)
+            {
+                SpawnEnemy(enemyPrefab);
+            }
         }
 
-        enemiesAlive = enemyCount;
+        enemiesAlive = waveComposition.Count;
+        Debug.Log($"Врагов в волне: {enemiesAlive}");
     }
 
-    void SpawnEnemy()
+    List<GameObject> GetWaveComposition(int wave)
+    {
+        List<GameObject> enemies = new List<GameObject>();
+
+        // ВОЛНА 1-2: Только Basic
+        if (wave <= 2)
+        {
+            for (int i = 0; i < 3 + wave; i++)
+            {
+                enemies.Add(basicEnemyPrefab);
+            }
+        }
+        // ВОЛНА 3-4: Basic + Shooter
+        else if (wave <= 4)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                enemies.Add(basicEnemyPrefab);
+            }
+            enemies.Add(shooterEnemyPrefab);
+            
+            if (wave == 4)
+            {
+                enemies.Add(shooterEnemyPrefab);
+            }
+        }
+        // ВОЛНА 5-6: Basic + Shooter + Fast
+        else if (wave <= 6)
+        {
+            enemies.Add(basicEnemyPrefab);
+            enemies.Add(shooterEnemyPrefab);
+            
+            for (int i = 0; i < 2; i++)
+            {
+                enemies.Add(fastEnemyPrefab);
+            }
+            
+            if (wave == 6)
+            {
+                enemies.Add(dasherEnemyPrefab);
+            }
+        }
+        // ВОЛНА 7-8: Разнообразие + Tank
+        else if (wave <= 8)
+        {
+            enemies.Add(tankEnemyPrefab);
+            enemies.Add(basicEnemyPrefab);
+            enemies.Add(basicEnemyPrefab);
+            enemies.Add(shooterEnemyPrefab);
+            enemies.Add(fastEnemyPrefab);
+            
+            if (wave == 8)
+            {
+                enemies.Add(dasherEnemyPrefab);
+                enemies.Add(teleporterEnemyPrefab);
+            }
+        }
+        // ВОЛНА 9+: Экстрим
+        else
+        {
+            // Танки
+            int tankCount = Mathf.Min((wave - 7) / 2, 3);
+            for (int i = 0; i < tankCount; i++)
+            {
+                enemies.Add(tankEnemyPrefab);
+            }
+
+            // Shooter
+            for (int i = 0; i < 2; i++)
+            {
+                enemies.Add(shooterEnemyPrefab);
+            }
+
+            // Dasher
+            for (int i = 0; i < 2; i++)
+            {
+                enemies.Add(dasherEnemyPrefab);
+            }
+
+            // Teleporter
+            enemies.Add(teleporterEnemyPrefab);
+            enemies.Add(teleporterEnemyPrefab);
+
+            // Fast
+            for (int i = 0; i < 3; i++)
+            {
+                enemies.Add(fastEnemyPrefab);
+            }
+        }
+
+        return enemies;
+    }
+
+    void SpawnEnemy(GameObject enemyPrefab)
     {
         if (enemyPrefab == null)
         {
-            Debug.LogError("GameManager: Префаб врага не назначен!");
+            Debug.LogWarning("GameManager: Префаб врага не назначен!");
             return;
         }
 
@@ -99,17 +207,9 @@ public class GameManager : MonoBehaviour
         spawnPosition.z = 0; // Обнуляем Z для 2D
 
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-        
-        // Увеличиваем скорость врагов с каждой волной
-        EnemyAI enemyAI = enemy.GetComponent<EnemyAI>();
-        if (enemyAI != null)
-        {
-            // TODO: Добавить публичный метод для изменения скорости
-            // enemyAI.SetSpeed(baseSpeed + currentWave * speedIncreasePerWave);
-        }
+        enemy.name = $"{enemyPrefab.name}_Wave{currentWave}";
 
-        // Подписываемся на смерть врага (пока вручную, позже через событие)
-        enemy.name = $"Enemy_{currentWave}_{enemiesAlive}";
+        Debug.Log($"✅ Создан: {enemy.name} на позиции {spawnPosition}");
     }
 
     // Вызывается, когда враг умирает
@@ -120,6 +220,11 @@ public class GameManager : MonoBehaviour
         
         Debug.Log($"💀 Враг уничтожен! Осталось: {enemiesAlive}, Счёт: {score}");
     }
+
+    // Геттеры для UI
+    public int GetCurrentWave() => currentWave;
+    public int GetScore() => score;
+    public int GetEnemiesAlive() => enemiesAlive;
 
     // Визуализация зоны спавна (2D круг)
     void OnDrawGizmosSelected()
