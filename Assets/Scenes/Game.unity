@@ -292,6 +292,61 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!1 &188631287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 188631289}
+  - component: {fileID: 188631288}
+  m_Layer: 0
+  m_Name: TrapManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &188631288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188631287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c4cf4855914aef44b86175394eb8fc3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blackHolePrefab: {fileID: 5071045667739635213, guid: f0af852c4d6fb7a4eb115bc343b1d053, type: 3}
+  minBlackHoles: 1
+  maxBlackHoles: 3
+  arenaRadius: 18
+  minDistanceFromCenter: 5
+  minDistanceBetweenHoles: 4
+  sizeRange: {x: 0.5, y: 2}
+  randomizeOnStart: 1
+  respawnInterval: 15
+  avoidPlayerSpawn: 1
+  playerSafeRadius: 8
+--- !u!4 &188631289
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188631287}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.64040464, y: -0.42574382, z: -0.0054560006}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &402330457
 GameObject:
   m_ObjectHideFlags: 0
@@ -869,3 +924,4 @@ SceneRoots:
   - {fileID: 1045153425}
   - {fileID: 2091853175}
   - {fileID: 402330461}
+  - {fileID: 188631289}
