@@ -9,9 +9,16 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float pushResistance = 1f; // 1 = нормально, 2 = тяжелее (Heavy Orb)
 
+    [Header("Knockback")]
+    [SerializeField] private float knockbackRecoveryTime = 0.5f; // Время "оглушения" после импульса
+    [SerializeField] private float knockbackThreshold = 2f; // Минимальная скорость для определения отброса
+
     [Header("References")]
     private Transform player;
     private Rigidbody2D rb;
+    
+    private bool isKnockedBack = false;
+    private float knockbackTimer = 0f;
 
     void Start()
     {
@@ -35,16 +42,50 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        // Таймер восстановления после отброса
+        if (isKnockedBack)
+        {
+            knockbackTimer -= Time.deltaTime;
+            if (knockbackTimer <= 0f)
+            {
+                isKnockedBack = false;
+            }
+        }
+    }
+
     void FixedUpdate()
     {
-        if (player == null) return;
+        if (player == null || rb == null) return;
 
-        // Двигаемся к игроку (2D - только X и Y)
-        Vector2 direction = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        // Проверяем, не отброшен ли враг
+        if (rb.linearVelocity.magnitude > knockbackThreshold)
+        {
+            // Враг летит после импульса - не управляем им
+            isKnockedBack = true;
+            knockbackTimer = knockbackRecoveryTime;
+            return;
+        }
 
-        // Используем MovePosition для плавного движения
-        Vector2 targetPosition = rb.position + direction * moveSpeed * Time.fixedDeltaTime;
-        rb.MovePosition(targetPosition);
+        // Если враг оглушён - не двигаемся
+        if (isKnockedBack)
+        {
+            return;
+        }
+
+        // Двигаемся к игроку через AddForce (учитывает физику!)
+        Vector2 direction = ((Vector2)player.position - rb.position).normalized;
+
+        // Используем AddForce вместо MovePosition
+        rb.AddForce(direction * moveSpeed, ForceMode2D.Force);
+
+        // Ограничиваем максимальную скорость преследования
+        float maxChaseSpeed = moveSpeed;
+        if (rb.linearVelocity.magnitude > maxChaseSpeed)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * maxChaseSpeed;
+        }
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -54,6 +95,16 @@ public class EnemyAI : MonoBehaviour
         {
             Debug.Log("⚠️ Враг коснулся игрока!");
             // TODO: Система урона
+        }
+    }
+
+    // Визуализация состояния в редакторе
+    void OnDrawGizmos()
+    {
+        if (isKnockedBack)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, 0.6f);
         }
     }
 }

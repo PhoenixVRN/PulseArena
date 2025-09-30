@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
 
     [Header("Visual")]
     [SerializeField] private GameObject impulsePrefab; // Префаб визуального эффекта волны
+    [SerializeField] private float screenShakeDuration = 0.2f;
+    [SerializeField] private float screenShakeIntensity = 0.3f;
 
     private Rigidbody2D rb;
     private float lastImpulseTime = -999f;
@@ -65,7 +67,8 @@ public class PlayerController : MonoBehaviour
         // Проверка кулдауна
         if (Time.time - lastImpulseTime < impulseCooldown)
         {
-            Debug.Log($"Импульс на перезарядке! Осталось: {impulseCooldown - (Time.time - lastImpulseTime):F1}с");
+            float remaining = impulseCooldown - (Time.time - lastImpulseTime);
+            Debug.Log($"⏳ Импульс на перезарядке! Осталось: {remaining:F1}с");
             return;
         }
 
@@ -77,16 +80,21 @@ public class PlayerController : MonoBehaviour
     {
         Debug.Log("💥 ИМПУЛЬС!");
 
-        // Визуальный эффект
+        // Визуальный эффект волны
         if (impulsePrefab != null)
         {
             GameObject impulseEffect = Instantiate(impulsePrefab, transform.position, Quaternion.identity);
             Destroy(impulseEffect, 1f); // Уничтожить через 1 секунду
         }
 
+        // Screen shake эффект
+        CameraShake();
+
         // Физика - отбрасываем всё в радиусе (2D)
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, impulseRadius);
         
+        int enemiesHit = 0;
+
         foreach (Collider2D col in hitColliders)
         {
             // Не толкаем себя
@@ -100,9 +108,56 @@ public class PlayerController : MonoBehaviour
                 
                 // Применяем силу
                 targetRb.AddForce(direction * impulseForce, ForceMode2D.Impulse);
+                Debug.Log($"namr {col.gameObject}/ {direction * impulseForce}");
+                // Визуальный эффект на враге
+                if (col.CompareTag("Enemy"))
+                {
+                    enemiesHit++;
+                    StartCoroutine(FlashEnemy(col.GetComponent<SpriteRenderer>()));
+                }
 
-                Debug.Log($"Отброшен: {col.gameObject.name}");
+                Debug.Log($"🎯 Отброшен: {col.gameObject.name}");
             }
+        }
+
+        if (enemiesHit > 0)
+        {
+            Debug.Log($"💪 Попадание! Врагов отброшено: {enemiesHit}");
+        }
+        else
+        {
+            Debug.Log("❌ Промах! Нет врагов в радиусе.");
+        }
+    }
+
+    // Эффект вспышки на враге при попадании
+    System.Collections.IEnumerator FlashEnemy(SpriteRenderer enemySprite)
+    {
+        if (enemySprite == null) yield break;
+
+        Color originalColor = enemySprite.color;
+        enemySprite.color = Color.white; // Вспышка белым
+
+        yield return new WaitForSeconds(0.1f);
+
+        if (enemySprite != null)
+        {
+            enemySprite.color = originalColor;
+        }
+    }
+
+    // Screen shake эффект
+    void CameraShake()
+    {
+        Camera mainCam = Camera.main;
+        if (mainCam != null)
+        {
+            CameraShakeEffect shakeEffect = mainCam.GetComponent<CameraShakeEffect>();
+            if (shakeEffect == null)
+            {
+                shakeEffect = mainCam.gameObject.AddComponent<CameraShakeEffect>();
+            }
+            shakeEffect.Shake(screenShakeDuration, screenShakeIntensity);
         }
     }
 

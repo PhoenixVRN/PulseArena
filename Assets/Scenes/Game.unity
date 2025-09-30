@@ -224,9 +224,11 @@ MonoBehaviour:
   moveSpeed: 10
   maxSpeed: 15
   impulseRadius: 5
-  impulseForce: 20
+  impulseForce: 10
   impulseCooldown: 1.5
   impulsePrefab: {fileID: 1090982193723548303, guid: 7af964eae41204544a857f20042b13b3, type: 3}
+  screenShakeDuration: 0.2
+  screenShakeIntensity: 0.3
 --- !u!58 &116489228
 CircleCollider2D:
   m_ObjectHideFlags: 0
